@@ -1,0 +1,40 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: application-set-ykannan-demo
+  namespace: argocd
+spec:
+  generators:
+    - git:
+        repoURL: git@gitlab.com:sre8172122/ykannan-helm.git
+        revision: HEAD
+        directories:
+        - path: deployment/ykannan-dev/*/*/*/*/*/*
+  template:      
+    metadata:
+      name: '{{path[3]}}-{{path[4]}}-{{path.basename}}'
+    spec:
+      project: dev
+      sources:
+        - repoURL: https://charts.helm.sh/stable
+          chart: '{{path[4]}}'
+          targetRevision: '{{path[5]}}'
+          helm:
+            releaseName: '{{path[3]}}-{{path[4]}}-{{path.basename}}'
+            valueFiles:
+              - $values/deployment/2K-31U-Dev/values.yaml
+              - $values/deployment/2K-31U-Dev/{{path[2]}}/values.yaml
+              - $values/deployment/2K-31U-Dev/{{path[2]}}/{{path[3]}}/values.yaml
+              - $values/deployment/2K-31U-Dev/{{path[2]}}/{{path[3]}}/{{path[4]}}/{{path[5]}}/{{path[6]}}/{{path.basename}}/values.yaml
+        - repoURL: 'git@gitlab.com:sre8172122/ykannan-helm.git'
+          targetRevision: HEAD
+          ref: values
+      destination:
+        name: '{{path[3]}}'
+        namespace: '{{path[6]}}'
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true  
+        automated: # automated sync by default retries failed attempts 5 times with following delays between attempts ( 5s, 10s, 20s, 40s, 80s ); retry controlled using `retry` field.
+          prune: true # Specifies if resources should be pruned during auto-syncing (false by default).
+          selfHeal: true
