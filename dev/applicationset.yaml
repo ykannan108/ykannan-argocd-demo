@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: application-set-ykannan-demo1
+  name: application-set-ykannan-demo
   namespace: argocd
 spec:
   generators:
